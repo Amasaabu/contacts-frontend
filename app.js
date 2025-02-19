@@ -1,6 +1,6 @@
 // Mock API functions
 const HOST = "http://localhost:3000"
-const mockAPI = {
+const APIFUNCTIONS = {
     getContacts: async () => {
     const contact =  await fetch(`${HOST}/api/contacts`)
     return await contact.json()
@@ -49,7 +49,7 @@ const mockAPI = {
   
   // Functions
   async function loadContacts() {
-    contacts = await mockAPI.getContacts()
+    contacts = await APIFUNCTIONS.getContacts()
     console.log(contacts);
     renderContacts()
   }
@@ -91,11 +91,11 @@ const mockAPI = {
       email: document.getElementById("email").value,
     }
     if (editingContact) {
-      await mockAPI.updateContact(contact, editingContact.id)
+      await APIFUNCTIONS.updateContact(contact, editingContact.id)
       editingContact = null
       alert(`Contact updated: ${contact.firstName} ${contact.lastName}`)
     } else {
-      await mockAPI.addContact(contact)
+      await APIFUNCTIONS.addContact(contact)
       alert(`Contact added: ${contact.firstName} ${contact.lastName}`)
     }
   
@@ -125,7 +125,7 @@ const mockAPI = {
     const contactToDelete = contacts.find((contact) => contact.id === id)
     if (contactToDelete) {
       if (confirm(`Are you sure you want to delete ${contactToDelete.firstName} ${contactToDelete.lastName}?`)) {
-        await mockAPI.deleteContact(id)
+        await APIFUNCTIONS.deleteContact(id)
         alert(`Contact deleted: ${contactToDelete.firstName} ${contactToDelete.lastName}`)
         await loadContacts()
       }
