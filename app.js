@@ -1,45 +1,34 @@
 // Mock API functions
+const HOST = "http://localhost:3000"
 const mockAPI = {
-    getContacts: () => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(JSON.parse(localStorage.getItem("contacts") || "[]"))
-        }, 300)
+    getContacts: async () => {
+    const contact =  await fetch(`${HOST}/api/contacts`)
+    return await contact.json()
+    },
+    addContact: async(contact) => {
+      return await fetch(`${HOST}/api/contacts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contact),
       })
     },
-    addContact: (contact) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const contacts = JSON.parse(localStorage.getItem("contacts") || "[]")
-          contact.id = Date.now()
-          contacts.push(contact)
-          localStorage.setItem("contacts", JSON.stringify(contacts))
-          resolve(contact)
-        }, 300)
+    updateContact:async (contact, id) => {
+    console.log(contact);
+      return await fetch(`${HOST}/api/contacts/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(contact),
       })
     },
-    updateContact: (contact) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const contacts = JSON.parse(localStorage.getItem("contacts") || "[]")
-          const index = contacts.findIndex((c) => c.id === contact.id)
-          if (index !== -1) {
-            contacts[index] = contact
-            localStorage.setItem("contacts", JSON.stringify(contacts))
-            resolve(contact)
-          }
-        }, 300)
+    deleteContact: async(id) => {
+      const response = await fetch(`${HOST}/api/contacts/${id}`, {
+        method: "DELETE",
       })
-    },
-    deleteContact: (id) => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const contacts = JSON.parse(localStorage.getItem("contacts") || "[]")
-          const updatedContacts = contacts.filter((c) => c.id !== id)
-          localStorage.setItem("contacts", JSON.stringify(updatedContacts))
-          resolve()
-        }, 300)
-      })
+        return await response.json()
     },
   }
   
@@ -61,6 +50,7 @@ const mockAPI = {
   // Functions
   async function loadContacts() {
     contacts = await mockAPI.getContacts()
+    console.log(contacts);
     renderContacts()
   }
   
@@ -95,15 +85,13 @@ const mockAPI = {
   async function handleFormSubmit(e) {
     e.preventDefault()
     const contact = {
-      id: document.getElementById("contactId").value,
       firstName: document.getElementById("firstName").value,
       lastName: document.getElementById("lastName").value,
       phone: document.getElementById("phone").value,
       email: document.getElementById("email").value,
     }
-  
     if (editingContact) {
-      await mockAPI.updateContact(contact)
+      await mockAPI.updateContact(contact, editingContact.id)
       editingContact = null
       alert(`Contact updated: ${contact.firstName} ${contact.lastName}`)
     } else {
@@ -116,8 +104,10 @@ const mockAPI = {
   }
   
   function handleEdit(e) {
-    const id = Number.parseInt(e.target.getAttribute("data-id"))
+    const id = e.target.getAttribute("data-id")
     editingContact = contacts.find((contact) => contact.id === id)
+    console.log("editingContact")
+    console.log(editingContact)   
     if (editingContact) {
       document.getElementById("contactId").value = editingContact.id
       document.getElementById("firstName").value = editingContact.firstName
@@ -126,10 +116,12 @@ const mockAPI = {
       document.getElementById("email").value = editingContact.email
       submitBtn.textContent = "Update Contact"
     }
+    window.scrollTo(0, 0)
   }
   
   async function handleDelete(e) {
-    const id = Number.parseInt(e.target.getAttribute("data-id"))
+    const id = e.target.getAttribute("data-id")
+
     const contactToDelete = contacts.find((contact) => contact.id === id)
     if (contactToDelete) {
       if (confirm(`Are you sure you want to delete ${contactToDelete.firstName} ${contactToDelete.lastName}?`)) {
